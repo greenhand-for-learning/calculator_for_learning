@@ -10,10 +10,31 @@ using namespace std;
 double const complex::MIN = 0.001;
 
 complex complex::operator+ (complex b){
-    complex sum;
-    sum.r = r + b.r;
-    sum.c = c + b.c;
-    return sum;
+    complex ret;
+    ret.r = r + b.r;
+    ret.c = c + b.c;
+    return ret;
+}
+
+complex complex::operator- (complex b){
+    complex ret;
+    ret.r = r - b.r;
+    ret.c = c - b.c;
+    return ret;
+}
+
+complex complex::operator* (complex b){
+    complex ret;
+    ret.r = r * b.r - c * b.c;
+    ret.c = r * b.c + c * b.r;
+    return ret;
+}
+
+complex complex::operator/ (complex b){
+    complex ret;
+    ret.r = (r * b.r + c * b.c) / (b.r * b.r + b.c * b.c);
+    ret.c = (c * b.r - r * b.c) / (b.r * b.r + b.c * b.c);
+    return ret;
 }
 
 void complex::show() {

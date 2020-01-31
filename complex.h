@@ -15,14 +15,15 @@ class complex{
 
 public:
     complex(): r(), c(){};
-    complex(double a, double b): r(a), c(b){
-        cout << "Welcome to complex mode!" << endl;
-    }
+    complex(double a, double b): r(a), c(b){};
 
     void show();
 
-private:
+//private:
     complex operator+ (complex b);
+    complex operator- (complex b);
+    complex operator* (complex b);
+    complex operator/ (complex b);
 };
 
 #endif //CASIO_COMPLEX_H
