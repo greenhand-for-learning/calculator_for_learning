@@ -3,4 +3,4 @@ project(CASIO)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(CASIO main.cpp)
+add_executable(CASIO main.cpp calculate.h calculate.cpp)
