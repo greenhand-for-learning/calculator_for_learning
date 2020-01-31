@@ -6,6 +6,7 @@
 #define CASIO_COMPLEX_H
 
 #include <iostream>
+#include <string>
 using namespace std;
 
 class complex{
@@ -19,11 +20,14 @@ public:
 
     void show();
 
-//private:
+private:
     complex operator+ (complex b);
     complex operator- (complex b);
     complex operator* (complex b);
     complex operator/ (complex b);
+    static complex power(complex a, int b);
 };
+
+complex calculate_with_complex(string formula);
 
 #endif //CASIO_COMPLEX_H

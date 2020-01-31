@@ -4,7 +4,7 @@
 
 #include "complex.h"
 #include <iostream>
-#include <cstdio>
+#include <string>
 using namespace std;
 
 double const complex::MIN = 0.001;
@@ -37,6 +37,17 @@ complex complex::operator/ (complex b){
     return ret;
 }
 
+complex complex::power(complex a, int b){
+    complex ret(0, 0);
+    complex tmp = a;
+    while(b){
+        ret = ret * a;
+        a = a * a;
+        b /= 2;
+    }
+    return ret;
+}
+
 void complex::show() {
     bool real = r >= MIN || r <= -MIN, com = c >= MIN || c <= -MIN;
     if(real){
@@ -50,4 +61,8 @@ void complex::show() {
     } else {
         cout << c << 'i';
     }
+}
+
+complex calculate_with_complex(string formula){
+
 }
