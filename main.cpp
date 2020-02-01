@@ -6,7 +6,7 @@ int main(){
     string tmp;
     while(getline(cin, tmp)){
         bool valid = true;
-        double ans = calculate_with_real(tmp, valid);
+        double ans = calculate_with_real(tmp, valid, "D");
         if(valid){
             cout << tmp << " = " << ans << endl;
         }

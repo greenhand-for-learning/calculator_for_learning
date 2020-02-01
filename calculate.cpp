@@ -8,11 +8,20 @@
 #include <iostream>
 using namespace std;
 
+double D2R(double D){
+    double const PI = 3.14159265;
+    return D * PI / 180;
+}
+
+double R2D(double R){
+    double const PI = 3.14159265;
+    return R * 180 / PI;
+}
+
 double calculate_with_real(string & formula, bool & valid, string DorR = "R", int start = 0, int finish = 0x7fffffff){
     if(finish > formula.length()){
         finish = formula.length();
     }
-    double const PI = 3.14159265;
     double block[1000] = {0};
     int sign[1000] = {0};
     bool isblock[1000] = {false};
@@ -178,6 +187,79 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
             }
             block[tail - 1] = pow(block[tail - 1], tmp2);
             continue;
+        }
+
+        if((formula[i] >= 'a' && formula[i] <= 'z') || (formula[i] >= 'A' && formula[i] <= 'Z')){
+            while((formula[i] >= 'a' && formula[i] <= 'z') || (formula[i] >= 'A' && formula[i] <= 'Z')){
+                tmp += formula[i];///注意归零
+                i ++;
+                if(i >= finish){ break;}
+            }
+            i--;
+
+            if(tmp == "sin" || tmp == "cos" || tmp == "tan" || tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"){
+                //These codes are entirely the same as those if formula[i] == '^'.
+                i++;
+                while(i < finish && formula[i] == ' '){i++;}
+                if(i >= finish){
+                    cout << "Invalid input! There is something wrong in the use of sin." << endl;
+                    valid = false;
+                    return -1;
+                }
+                if(formula[i] != '('){
+                    cout << "Invalid input! sin must be followed by parentheses()." << endl;
+                    valid = false;
+                    return -1;
+                }
+                //These codes are entirely the same as those if formula[i] == '('.
+                g = 1;
+                i++;
+                int now = i;
+                while(g){
+                    if(i >= finish){
+                        cout << "Invalid input! Please check your use of parentheses." << endl;
+                        valid = false;
+                        return -1;
+                    }
+                    if(formula[i] == '('){
+                        g++;
+                    }
+                    else if(formula[i] == ')'){
+                        g--;
+                    }
+                    i++;
+                }
+                i--;
+                double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
+                if(tmp == "sin" || tmp == "cos" || tmp == "tan"){
+                    if(DorR == "D"){
+                        tmp2 = D2R(tmp2);
+                    }
+                    if(tmp == "sin"){block[tail] = sin(tmp2);}
+                    else if(tmp == "cos"){block[tail] = cos(tmp2);}
+                    else if(tmp == "tan"){block[tail] = tan(tmp2);}
+                    isblock[tail] = true;
+                    tail ++;
+                }
+                else if(tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"){
+                    if(tmp == "arcsin"){tmp2 = asin(tmp2);}
+                    else if(tmp == "arccos"){tmp2 = acos(tmp2);}
+                    else if(tmp == "arctan"){tmp2 = atan(tmp2);}
+                    if(DorR == "D"){
+                        tmp2 = R2D(tmp2);
+                    }
+                    block[tail] = tmp2;
+                    isblock[tail] = true;
+                    tail ++;
+                }
+            }
+            else {
+                cout << "Invalid input! Please check your use of function." << endl;
+                valid = false;
+                return -1;
+            }
+
+            tmp = "";
         }
     }
     /*
