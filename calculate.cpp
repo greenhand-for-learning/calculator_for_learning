@@ -135,6 +135,49 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 tail ++;
             }
             lev = now_lev;
+            continue;
+        }
+
+        if(formula[i] == '^'){
+            i ++;
+            while(i < finish && formula[i] == ' '){i++;}
+            if(i >= finish){
+                cout << "Invalid input! There is something wrong in the use of ^." << endl;
+                valid = false;
+                return -1;
+            }
+            if(formula[i] != '('){
+                cout << "Invalid input! ^ must be followed by parentheses()." << endl;
+                valid = false;
+                return -1;
+            }
+            //These codes are entirely the same as those if formula[i] == '('.
+            g = 1;
+            i++;
+            int now = i;
+            while(g){
+                if(i >= finish){
+                    cout << "Invalid input! Please check your use of parentheses." << endl;
+                    valid = false;
+                    return -1;
+                }
+                if(formula[i] == '('){
+                    g++;
+                }
+                else if(formula[i] == ')'){
+                    g--;
+                }
+                i++;
+            }
+            i--;
+            double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
+            if(!isblock[tail - 1]){
+                cout << "Invalid input! Please check your use of ^." << endl;
+                valid = false;
+                return -1;
+            }
+            block[tail - 1] = pow(block[tail - 1], tmp2);
+            continue;
         }
     }
     /*

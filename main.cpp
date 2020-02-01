@@ -4,8 +4,7 @@
 using namespace std;
 int main(){
     string tmp;
-    while(true){
-        getline(cin, tmp);
+    while(getline(cin, tmp)){
         bool valid = true;
         double ans = calculate_with_real(tmp, valid);
         if(valid){
