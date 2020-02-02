@@ -223,7 +223,9 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
             }
             i--;
 
-            if(tmp == "sin" || tmp == "cos" || tmp == "tan" || tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"){
+            if(tmp == "sin" || tmp == "cos" || tmp == "tan" || tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"
+                            || tmp == "sinh" || tmp == "cosh" || tmp == "tanh"
+                            || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt"){
                 //These codes are entirely the same as those if formula[i] == '^'.
                 i++;
                 while(i < finish && formula[i] == ' '){i++;}
@@ -281,6 +283,20 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     if(DorR == "D"){
                         tmp2 = R2D(tmp2);
                     }
+                    block[tail] = tmp2;
+                    isblock[tail] = true;
+                    tail ++;
+                }
+                else if(tmp == "tanh" || tmp == "cosh" || tmp == "sinh"
+                        ||tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt"){
+                    if(tmp == "sinh"){tmp2 = sinh(tmp2);}
+                    else if(tmp == "cosh"){tmp2 = cosh(tmp2);}
+                    else if(tmp == "tanh"){tmp2 = tanh(tmp2);}
+                    else if(tmp == "exp"){tmp2 = exp(tmp2);}
+                    else if(tmp == "ln"){tmp2 = log(tmp2);}
+                    else if(tmp == "lg"){tmp2 = log10(tmp2);}
+                    else if(tmp == "sqrt"){tmp2 = sqrt(tmp2);}
+                    else if(tmp == "cbrt"){tmp2 = cbrt(tmp2);}
                     block[tail] = tmp2;
                     isblock[tail] = true;
                     tail ++;
