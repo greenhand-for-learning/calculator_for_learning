@@ -262,6 +262,12 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
             continue;
         }
 
+        if((formula[i] >= 'A' && formula[i] <= 'D') || formula[i] == 'x' || formula[i] == 'y' || formula[i] == 'M'){
+            double tmp2 = call_sto(formula[i]);
+            load_number(block, sign, isblock, tail, lev, tmp2);
+            continue;
+        }
+
         if((formula[i] >= 'a' && formula[i] <= 'z') && formula[i] != 'x' && formula[i] != 'y'){
             string tmp = get_string(formula, i, valid, finish);
 
