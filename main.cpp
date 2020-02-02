@@ -1,5 +1,6 @@
 #include "calculate.h"
 #include "statistic.h"
+#include "radix.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -20,7 +21,7 @@ int main(){
 
     }
     else if(opt == 3){
-
+        radix_main();
     }
     else if(opt == 4){
 
