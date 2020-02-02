@@ -2,12 +2,10 @@
 // Created by huangb19 on 2020/2/2.
 //
 
-#include <cmath>
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include <stack>
-#include <cassert>
 using namespace std;
 typedef long long ll;
 
@@ -57,14 +55,19 @@ bool isnum(char s){
     return (s >= '0' && s <= '9') || (s >= 'A' && s <= 'F');
 }
 void cal_once(){
+    if(s_num.size() <= 1 || s_op.top() == '(') {
+        errflag = 1;
+        cout << "Invalid expression" << endl;
+        return;
+    }
     ll n1 = s_num.top(); s_num.pop();
     ll n2 = s_num.top(); s_num.pop();
     char op = s_op.top(); s_op.pop();
     if(op == '+') s_num.push(n1 + n2);
-    if(op == '-') s_num.push(n1 - n2);
+    if(op == '-') s_num.push(n2 - n1);
     if(op == '*') s_num.push(n1 * n2);
     if(op == '/'){
-        if(n2 != 0)s_num.push(n1 / n2);
+        if(n2 != 0)s_num.push(n2 / n1);
         else{
             cout << "Division by 0" << endl;
             errflag = 1;
@@ -78,9 +81,10 @@ ll cal(string s, int base){
     while(!s_op.empty())s_op.pop();
     s = "(" + s + ")";
     int l = s.length();
-
+    bool last_num = 0;
     for(int i = 0; i < l; i++){
         if(isnum(s[i])){
+            if(last_num)s_op.push('*');
             string sn = "";
             sn += s[i];
             int k = i;
@@ -101,9 +105,11 @@ ll cal(string s, int base){
                 cout << "Invalid number" << endl;
                 return 0;
             }
+            last_num = 1;
         }
-        else if(s[i] == '(' || s[i] == '*' || s[i] == '/'){
+        else if(s[i] == '(' || s[i] == '*' || s[i] == '/') {
             s_op.push(s[i]);
+            if(s[i] == '*' || s[i] == '/')last_num = 0;
         }
         else if(s[i] == ')'){
             while(s_op.top() != '('){
@@ -123,6 +129,7 @@ ll cal(string s, int base){
                 if (errflag)return 0;
             }
             s_op.push(s[i]);
+            last_num = 0;
         }
         else if(s[i] != ' '){
             cout << "Invalid character" << endl;
@@ -130,24 +137,42 @@ ll cal(string s, int base){
             return 0;
         }
     }
-    assert(s_num.size() == 1 && s_op.size() == 0);
+    if(!(s_num.size() == 1 && s_op.size() == 0)){
+        errflag = 1;
+        cout << "Unknown error" << endl;
+        return 0;
+    }
     return s_num.top();
 }
 
 
 void radix_main(){
-    errflag = 0;
-    int base;
+    int base = 0;
     string s;
     cout << "radix mode" << endl;
     cout << "You can enter a special command immediately after the value to specify the numerical mode of the value. These special commands are: d (decimal), h (hexadecimal), b (binary), and o (octal)." << endl;
     cout << "Otherwise, all numbers are entered according to your specified base" << endl;
-    cout << "input the base (2 <= base <= 16) :" << endl;
-    cin >> base;
-    cout << "input the expression :" << endl;
-    getchar();
-    getline(cin, s);
-    ll num = cal(s, base);
-    if(!errflag) cout << dec2base(base, num) << endl;
-    return;
+    while(true){
+        cout << "input the base (2 <= base <= 16 and should be an integer)  (put 0 to exit):" << endl;
+        while(getline(cin, s)){
+            bool ok = 1;
+            int l = s.length();
+            for(int i = 0; i < l; i++)if(!isdigit(s[i]))ok = 0;
+            if(ok){
+                base = base2dec(10, s);
+                if(base == 0)return;
+                if(base >= 2 && base <= 16)break;
+            }
+            cout << "Invalid base" << endl;
+            cout << "input the base (2 <= base <= 16 and should be an integer)  (put 0 to exit):" << endl;
+        }
+        errflag = 1;
+        while(errflag){
+            cout << "input the expression :" << endl;
+            getline(cin, s);
+            errflag = 0;
+            ll num = cal(s, base);
+            if(!errflag) cout << dec2base(base, num) << endl;
+        }
+    }
 }
