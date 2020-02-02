@@ -6,16 +6,23 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#define INF_SMALL 1e-10
+#define PI 3.141592653589793238462643383279
 using namespace std;
 
 double D2R(double D){
-    double const PI = 3.14159265;
     return D * PI / 180;
 }
 
 double R2D(double R){
-    double const PI = 3.14159265;
     return R * 180 / PI;
+}
+
+bool IsInteger(double num){
+    double * intpart = new double;
+    num = modf(num, intpart);
+    delete intpart;
+    return abs(num) < INF_SMALL;
 }
 
 double calculate_with_real(string & formula, bool & valid, string DorR = "R", int start = 0, int finish = 0x7fffffff){
@@ -211,6 +218,13 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 valid = false;
                 return -1;
             }
+            if((abs(block[tail - 1]) < INF_SMALL && tmp2 < INF_SMALL)
+                || (block[tail - 1] <= -INF_SMALL && !IsInteger(tmp2)))
+            {
+                cout << "Mathematical error! There is something wrong when you use ^." << endl;
+                valid = false;
+                return -1;
+            }
             block[tail - 1] = pow(block[tail - 1], tmp2);
             continue;
         }
@@ -272,13 +286,34 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     }
                     if(tmp == "sin"){block[tail] = sin(tmp2);}
                     else if(tmp == "cos"){block[tail] = cos(tmp2);}
-                    else if(tmp == "tan"){block[tail] = tan(tmp2);}
+                    else if(tmp == "tan"){
+                        if(IsInteger((tmp2 - PI / 2) / PI)){
+                            cout << "Mathematical error! There is something wrong when you use tan." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        block[tail] = tan(tmp2);
+                    }
                     isblock[tail] = true;
                     tail ++;
                 }
                 else if(tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"){
-                    if(tmp == "arcsin"){tmp2 = asin(tmp2);}
-                    else if(tmp == "arccos"){tmp2 = acos(tmp2);}
+                    if(tmp == "arcsin"){
+                        if(tmp2 > 1 || tmp2 < -1){
+                            cout << "Mathematical error! There is something wrong when you use arcsin." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        tmp2 = asin(tmp2);
+                    }
+                    else if(tmp == "arccos"){
+                        if(tmp2 > 1 || tmp2 < -1){
+                            cout << "Mathematical error! There is something wrong when you use arccos." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        tmp2 = acos(tmp2);
+                    }
                     else if(tmp == "arctan"){tmp2 = atan(tmp2);}
                     if(DorR == "D"){
                         tmp2 = R2D(tmp2);
@@ -293,9 +328,35 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     else if(tmp == "cosh"){tmp2 = cosh(tmp2);}
                     else if(tmp == "tanh"){tmp2 = tanh(tmp2);}
                     else if(tmp == "exp"){tmp2 = exp(tmp2);}
-                    else if(tmp == "ln"){tmp2 = log(tmp2);}
-                    else if(tmp == "lg"){tmp2 = log10(tmp2);}
-                    else if(tmp == "sqrt"){tmp2 = sqrt(tmp2);}
+                    else if(tmp == "ln"){
+                        if(tmp2 < INF_SMALL){
+                            cout << "Mathematical error! There is something wrong when you use ln." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        tmp2 = log(tmp2);
+                    }
+                    else if(tmp == "lg"){
+                        if(tmp2 < INF_SMALL){
+                            cout << "Mathematical error! There is something wrong when you use lg." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        tmp2 = log10(tmp2);
+                    }
+                    else if(tmp == "sqrt"){
+                        if(tmp2 < -INF_SMALL){
+                            cout << "Mathematical error! There is something wrong when you use sqrt." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        else if(abs(tmp2) <= INF_SMALL){
+                            tmp2 = 0;
+                        }
+                        else {
+                            tmp2 = sqrt(tmp2);
+                        }
+                    }
                     else if(tmp == "cbrt"){tmp2 = cbrt(tmp2);}
                     block[tail] = tmp2;
                     isblock[tail] = true;
@@ -309,7 +370,11 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
             }
 
             tmp = "";
+            continue;
         }
+        cout << "Invalid input! Please check your formula." << endl;
+        valid = false;
+        return -1;
     }
     /*
     for(int i = 0; i < tail + 4; i ++){
@@ -357,5 +422,6 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
         else if (sign[tail - 2] == 3) { block[tail - 3] *= block[tail - 1]; }
         else if (sign[tail - 2] == 4) { block[tail - 3] /= block[tail - 1]; }
     }
+    if(abs(block[1]) < INF_SMALL){block[1] = 0;}
     return block[1];
 }
