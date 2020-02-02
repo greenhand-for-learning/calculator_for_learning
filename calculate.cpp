@@ -25,6 +25,65 @@ bool IsInteger(double num){
     return abs(num) < INF_SMALL;
 }
 
+double get_number(string & formula, int & i, bool & valid, int finish){
+    int g = 0;
+    string tmp;
+    double ret;
+
+    while ((formula[i] >= '0' && formula[i] <= '9') || formula[i] == '.') {
+        if (formula[i] == '.') {
+            if (++g >= 2) {
+                cout << "Invalid input! Please check your use of period." << endl;
+                valid = false;
+                return -1;
+            }
+        }
+        tmp += formula[i];
+        i++;
+        if(i >= finish){ break;}
+    }
+    stringstream ss;
+    ss << tmp;
+    ss >> ret;
+    i--;
+    return ret;
+}
+
+void load_number(double * block, int * sign, bool * isblock, int & tail, int & lev, double num){
+    if(isblock[tail - 1]){
+        cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
+        sign[tail] = 3;
+        isblock[tail] = false;
+        tail++;
+        lev = 2;
+    }
+    block[tail] = num;
+    isblock[tail] = true;
+    tail ++;
+}
+
+int get_parentheses(string & formula, int & i, bool & valid, int finish){
+    int g = 1;
+    i++;
+    int ret = i;
+    while(g){
+        if(i >= finish){
+            cout << "Invalid input! Please check your use of parentheses." << endl;
+            valid = false;
+            return -1;
+        }
+        if(formula[i] == '('){
+            g++;
+        }
+        else if(formula[i] == ')'){
+            g--;
+        }
+        i++;
+    }
+    i--;
+    return ret;
+}
+
 double calculate_with_real(string & formula, bool & valid, string DorR = "R", int start = 0, int finish = 0x7fffffff){
     if(finish > formula.length()){
         finish = formula.length();
@@ -49,70 +108,15 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
         }
 
         if((formula[i] >= '0' && formula[i] <= '9') || formula[i] == '.') {
-            g = 0;
-            while ((formula[i] >= '0' && formula[i] <= '9') || formula[i] == '.') {
-                //cout << formula[i] << endl;
-                if (formula[i] == '.') {
-                    if (++g >= 2) {
-                        cout << "Invalid input! Please check your use of period." << endl;
-                        valid = false;
-                        return -1;
-                    }
-                }
-                tmp += formula[i];
-                i++;
-                if(i >= finish){ break;}
-            }
-            if(isblock[tail - 1]){
-                cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
-                sign[tail] = 3;
-                isblock[tail] = false;
-                tail++;
-                lev = 2;
-            }
-            ss = new stringstream;
-            //cout << "tmp: " << tmp << endl;
-            *ss << tmp;
-            *ss >> block[tail];
-            //cout << "number:" << block[tail] << endl;
-            delete ss;
-            isblock[tail] = true;
-            tail ++;
-            tmp = "";
-            g = 0;
-            i--;
+            double tmp2 = get_number(formula, i, valid, finish);
+            load_number(block, sign, isblock, tail, lev, tmp2);
             continue;
         }
 
         if(formula[i] == '('){
-            g = 1;
-            i++;
-            int now = i;
-            while(g){
-                if(i >= finish){
-                    cout << "Invalid input! Please check your use of parentheses." << endl;
-                    valid = false;
-                    return -1;
-                }
-                if(formula[i] == '('){
-                    g++;
-                }
-                else if(formula[i] == ')'){
-                    g--;
-                }
-                i++;
-            }
-            i--;
-            if(isblock[tail - 1]){
-                cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
-                sign[tail] = 3;
-                isblock[tail] = false;
-                tail++;
-                lev = 2;
-            }
-            block[tail] = calculate_with_real(formula, valid, DorR, now, i);
-            isblock[tail] = true;
-            tail ++;
+            int now = get_parentheses(formula, i, valid, finish);
+            double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
+            load_number(block, sign, isblock, tail, lev, tmp2);
             continue;
         }
 
@@ -244,12 +248,12 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 i++;
                 while(i < finish && formula[i] == ' '){i++;}
                 if(i >= finish){
-                    cout << "Invalid input! There is something wrong in the use of sin." << endl;
+                    cout << "Invalid input! There is something wrong in the use of such function." << endl;
                     valid = false;
                     return -1;
                 }
                 if(formula[i] != '('){
-                    cout << "Invalid input! sin must be followed by parentheses()." << endl;
+                    cout << "Invalid input! Such function must be followed by parentheses()." << endl;
                     valid = false;
                     return -1;
                 }

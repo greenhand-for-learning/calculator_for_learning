@@ -6,8 +6,11 @@
 using namespace std;
 int main(){
     int opt;
+    cout << "Please choose a mode. (Now only mode 1 is available.)" << endl;
     cin >> opt;
+    getchar();
     if(opt == 1){
+        cout << "Welcome to mode 1: Calculate! Now you can type in your formula." << endl;
         string tmp;
         while(getline(cin, tmp)) {
             bool valid = true;
