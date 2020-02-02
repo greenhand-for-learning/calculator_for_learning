@@ -150,7 +150,7 @@ void radix_main(){
     int base = 0;
     string s;
     cout << "radix mode" << endl;
-    cout << "You can enter a special command immediately after the value to specify the numerical mode of the value. These special commands are: d (decimal), h (hexadecimal), b (binary), and o (octal)." << endl;
+    cout << "You can enter a special command right after the value to specify the numerical mode of the value. These special commands are: d (decimal), h (hexadecimal), b (binary), and o (octal)." << endl;
     cout << "Otherwise, all numbers are entered according to your specified base" << endl;
     while(true){
         cout << "input the base (2 <= base <= 16 and should be an integer)  (put 0 to exit):" << endl;
