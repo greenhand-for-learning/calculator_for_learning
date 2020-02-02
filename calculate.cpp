@@ -56,6 +56,13 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 i++;
                 if(i >= finish){ break;}
             }
+            if(isblock[tail - 1]){
+                cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
+                sign[tail] = 3;
+                isblock[tail] = false;
+                tail++;
+                lev = 2;
+            }
             ss = new stringstream;
             //cout << "tmp: " << tmp << endl;
             *ss << tmp;
@@ -89,6 +96,13 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 i++;
             }
             i--;
+            if(isblock[tail - 1]){
+                cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
+                sign[tail] = 3;
+                isblock[tail] = false;
+                tail++;
+                lev = 2;
+            }
             block[tail] = calculate_with_real(formula, valid, DorR, now, i);
             isblock[tail] = true;
             tail ++;
@@ -115,7 +129,14 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     if (sign[tail - 2] == 1) { block[tail - 3] += block[tail - 1]; }
                     else if (sign[tail - 2] == 2) { block[tail - 3] -= block[tail - 1]; }
                     else if (sign[tail - 2] == 3) { block[tail - 3] *= block[tail - 1]; }
-                    else if (sign[tail - 2] == 4) { block[tail - 3] /= block[tail - 1]; }
+                    else if (sign[tail - 2] == 4) {
+                        if(block[tail - 1] == 0){
+                            cout << "Mathematical error! 0 should not be put after /." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        block[tail - 3] /= block[tail - 1];
+                    }
                     if(sign[tail - 4] == 0) {lev = 0;}
                     if(sign[tail - 4] == 1 || sign[tail - 4] == 2) {lev = 1;}
                     if(sign[tail - 4] == 3 || sign[tail - 4] == 4) {lev = 2;}
@@ -129,6 +150,11 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 tail ++;
             }
             else if(formula[i] == '-'){//No.2, Lv.1
+                if(tail == 1){
+                    block[tail] = 0;
+                    isblock[tail] = true;
+                    tail ++;
+                }
                 sign[tail] = 2;
                 isblock[tail] = false;
                 tail ++;
@@ -230,6 +256,13 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     i++;
                 }
                 i--;
+                if(isblock[tail - 1]){
+                    cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
+                    sign[tail] = 3;
+                    isblock[tail] = false;
+                    tail++;
+                    lev = 2;
+                }
                 double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
                 if(tmp == "sin" || tmp == "cos" || tmp == "tan"){
                     if(DorR == "D"){
@@ -288,7 +321,14 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
             if (sign[tail - 2] == 1) { block[tail - 3] += block[tail - 1]; }
             else if (sign[tail - 2] == 2) { block[tail - 3] -= block[tail - 1]; }
             else if (sign[tail - 2] == 3) { block[tail - 3] *= block[tail - 1]; }
-            else if (sign[tail - 2] == 4) { block[tail - 3] /= block[tail - 1]; }
+            else if (sign[tail - 2] == 4) {
+                if(block[tail - 1] == 0){
+                    cout << "Mathematical error! 0 should not be put after /." << endl;
+                    valid = false;
+                    return -1;
+                }
+                block[tail - 3] /= block[tail - 1];
+            }
             if(sign[tail - 4] == 0) {lev = 0;}
             if(sign[tail - 4] == 1 || sign[tail - 4] == 2) {lev = 1;}
             if(sign[tail - 4] == 3 || sign[tail - 4] == 4) {lev = 2;}
