@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include "storage.h"
 #define INF_SMALL 1e-10
 #define PI 3.141592653589793238462643383279
 #define e_mathematics 2.718281828459045235360287471352
@@ -46,13 +47,41 @@ double get_number(string & formula, int & i, bool & valid, int finish){
     stringstream ss;
     ss << tmp;
     ss >> ret;
-    i--;
+    if(formula[i] != 'E') {
+        i--;
+    } else {
+        bool sign;
+        i++;
+        if(formula[i] == '+'){
+            sign = true;
+        }
+        else if(formula[i] == '-'){
+            sign = false;
+        }
+        else{
+            cout << "Invalid input! E must be followed by + or -." << endl;
+            valid = false;
+            return -1;
+        }
+        i++;
+        double idx = get_number(formula, i, valid, finish);
+        if(!IsInteger(idx)){
+            cout << "Invalid input! E must be followed by + or -, and then an integer." << endl;
+            valid = false;
+            return -1;
+        }
+        if(sign){
+            ret = ret * pow(10.0, idx);
+        } else {
+            ret = ret * pow(10.0, -idx);
+        }
+    }
     return ret;
 }
 
 string get_string(string & formula, int & i, bool & valid, int finish){
     string tmp;
-    while((formula[i] >= 'a' && formula[i] <= 'z') || (formula[i] >= 'A' && formula[i] <= 'Z')){
+    while((formula[i] >= 'a' && formula[i] <= 'z') && formula[i] != 'x' && formula[i] != 'y'){
         tmp += formula[i];
         i ++;
         if(i >= finish){ break;}
@@ -233,7 +262,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
             continue;
         }
 
-        if((formula[i] >= 'a' && formula[i] <= 'z') || (formula[i] >= 'A' && formula[i] <= 'Z')){
+        if((formula[i] >= 'a' && formula[i] <= 'z') && formula[i] != 'x' && formula[i] != 'y'){
             string tmp = get_string(formula, i, valid, finish);
 
             if(tmp == "sin" || tmp == "cos" || tmp == "tan" || tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"
