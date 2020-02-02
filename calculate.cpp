@@ -273,7 +273,8 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
 
             if(tmp == "sin" || tmp == "cos" || tmp == "tan" || tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"
                             || tmp == "sinh" || tmp == "cosh" || tmp == "tanh"
-                            || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt"){
+                            || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt"
+                            || tmp == "diff"){
                 //These codes are entirely the same as those if formula[i] == '^'.
                 i++;
                 while(i < finish && formula[i] == ' '){i++;}
@@ -288,83 +289,98 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     return -1;
                 }
                 int now = get_parentheses(formula, i, valid, finish);
-                double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
 
-                if(tmp == "sin" || tmp == "cos" || tmp == "tan"){
-                    if(DorR == "D"){
-                        tmp2 = D2R(tmp2);
+                if(tmp == "diff"){
+                    if(DorR != "R"){
+                        cout << "Error! When using function diff, you have to choose R rather than D(degree)." << endl;
+                        valid = false;
+                        return -1;
                     }
-                    if(tmp == "sin"){tmp2 = sin(tmp2);}
-                    else if(tmp == "cos"){tmp2 = cos(tmp2);}
-                    else if(tmp == "tan"){
-                        if(IsInteger((tmp2 - PI / 2) / PI)){
-                            cout << "Mathematical error! There is something wrong when you use tan." << endl;
+                    string func;
+                    double array[10];
+                    int j = now;
+                    while(formula[j] != ','){
+                        if(j >= i){
+                            cout << "Invalid input! The function diff should be used as diff(3x, 2)." << endl;
                             valid = false;
                             return -1;
                         }
-                        tmp2 = tan(tmp2);
+                        func += formula[j];
                     }
+                    j++;
+                    double root = calculate_with_real(formula, valid, DorR, now, i);
+                    get_all(array);
+                    ///To be continued...
                 }
-                else if(tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"){
-                    if(tmp == "arcsin"){
-                        if(tmp2 > 1 || tmp2 < -1){
-                            cout << "Mathematical error! There is something wrong when you use arcsin." << endl;
-                            valid = false;
-                            return -1;
+                else {
+                    double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
+                    if (tmp == "sin" || tmp == "cos" || tmp == "tan") {
+                        if (DorR == "D") {
+                            tmp2 = D2R(tmp2);
                         }
-                        tmp2 = asin(tmp2);
-                    }
-                    else if(tmp == "arccos"){
-                        if(tmp2 > 1 || tmp2 < -1){
-                            cout << "Mathematical error! There is something wrong when you use arccos." << endl;
-                            valid = false;
-                            return -1;
+                        if (tmp == "sin") { tmp2 = sin(tmp2); }
+                        else if (tmp == "cos") { tmp2 = cos(tmp2); }
+                        else if (tmp == "tan") {
+                            if (IsInteger((tmp2 - PI / 2) / PI)) {
+                                cout << "Mathematical error! There is something wrong when you use tan." << endl;
+                                valid = false;
+                                return -1;
+                            }
+                            tmp2 = tan(tmp2);
                         }
-                        tmp2 = acos(tmp2);
+                    } else if (tmp == "arcsin" || tmp == "arccos" || tmp == "arctan") {
+                        if (tmp == "arcsin") {
+                            if (tmp2 > 1 || tmp2 < -1) {
+                                cout << "Mathematical error! There is something wrong when you use arcsin." << endl;
+                                valid = false;
+                                return -1;
+                            }
+                            tmp2 = asin(tmp2);
+                        } else if (tmp == "arccos") {
+                            if (tmp2 > 1 || tmp2 < -1) {
+                                cout << "Mathematical error! There is something wrong when you use arccos." << endl;
+                                valid = false;
+                                return -1;
+                            }
+                            tmp2 = acos(tmp2);
+                        } else if (tmp == "arctan") { tmp2 = atan(tmp2); }
+                        if (DorR == "D") {
+                            tmp2 = R2D(tmp2);
+                        }
+                    } else if (tmp == "tanh" || tmp == "cosh" || tmp == "sinh"
+                               || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt") {
+                        if (tmp == "sinh") { tmp2 = sinh(tmp2); }
+                        else if (tmp == "cosh") { tmp2 = cosh(tmp2); }
+                        else if (tmp == "tanh") { tmp2 = tanh(tmp2); }
+                        else if (tmp == "exp") { tmp2 = exp(tmp2); }
+                        else if (tmp == "ln") {
+                            if (tmp2 < INF_SMALL) {
+                                cout << "Mathematical error! There is something wrong when you use ln." << endl;
+                                valid = false;
+                                return -1;
+                            }
+                            tmp2 = log(tmp2);
+                        } else if (tmp == "lg") {
+                            if (tmp2 < INF_SMALL) {
+                                cout << "Mathematical error! There is something wrong when you use lg." << endl;
+                                valid = false;
+                                return -1;
+                            }
+                            tmp2 = log10(tmp2);
+                        } else if (tmp == "sqrt") {
+                            if (tmp2 < -INF_SMALL) {
+                                cout << "Mathematical error! There is something wrong when you use sqrt." << endl;
+                                valid = false;
+                                return -1;
+                            } else if (abs(tmp2) <= INF_SMALL) {
+                                tmp2 = 0;
+                            } else {
+                                tmp2 = sqrt(tmp2);
+                            }
+                        } else if (tmp == "cbrt") { tmp2 = cbrt(tmp2); }
                     }
-                    else if(tmp == "arctan"){tmp2 = atan(tmp2);}
-                    if(DorR == "D"){
-                        tmp2 = R2D(tmp2);
-                    }
+                    load_number(block, sign, isblock, tail, lev, tmp2);
                 }
-                else if(tmp == "tanh" || tmp == "cosh" || tmp == "sinh"
-                        ||tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt"){
-                    if(tmp == "sinh"){tmp2 = sinh(tmp2);}
-                    else if(tmp == "cosh"){tmp2 = cosh(tmp2);}
-                    else if(tmp == "tanh"){tmp2 = tanh(tmp2);}
-                    else if(tmp == "exp"){tmp2 = exp(tmp2);}
-                    else if(tmp == "ln"){
-                        if(tmp2 < INF_SMALL){
-                            cout << "Mathematical error! There is something wrong when you use ln." << endl;
-                            valid = false;
-                            return -1;
-                        }
-                        tmp2 = log(tmp2);
-                    }
-                    else if(tmp == "lg"){
-                        if(tmp2 < INF_SMALL){
-                            cout << "Mathematical error! There is something wrong when you use lg." << endl;
-                            valid = false;
-                            return -1;
-                        }
-                        tmp2 = log10(tmp2);
-                    }
-                    else if(tmp == "sqrt"){
-                        if(tmp2 < -INF_SMALL){
-                            cout << "Mathematical error! There is something wrong when you use sqrt." << endl;
-                            valid = false;
-                            return -1;
-                        }
-                        else if(abs(tmp2) <= INF_SMALL){
-                            tmp2 = 0;
-                        }
-                        else {
-                            tmp2 = sqrt(tmp2);
-                        }
-                    }
-                    else if(tmp == "cbrt"){tmp2 = cbrt(tmp2);}
-                }
-                load_number(block, sign, isblock, tail, lev, tmp2);
             }
             else if(tmp == "pi" || tmp == "e"){
                 if(tmp == "pi"){

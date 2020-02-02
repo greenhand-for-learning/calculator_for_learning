@@ -42,6 +42,24 @@ void input(string line)
     }
 }
 
+int variable2idx(char key){
+    if(key >= 'A' && key <= 'D'){///A: 0, B: 1, C: 2, D: 3, x: 6, y: 7, M: 8
+        return key - 'A';
+    }
+    else if(key == 'x'){
+        return 6;
+    }
+    else if(key == 'y'){
+        return 7;
+    }
+    else if(key == 'M'){
+        return 8;
+    }
+    else {
+        return -1;
+    }
+}
+
 void io_sto(char key, double value)
 {
     ifstream i_storage("storage.txt");
@@ -50,15 +68,7 @@ void io_sto(char key, double value)
     for (int i = 0; i < 9; i++) {
         i_storage >> sto_num[i];
     }
-    if (key >= 'A' && key <= 'D') {///A: 0, B: 1, C: 2, D: 3, x: 6, y: 7, M: 8
-        sto_num[(int)(key - 'A')] = value;
-    } else if (key == 'x') {
-        sto_num[6] = value;
-    } else if (key == 'y') {
-        sto_num[7] = value;
-    } else if (key == 'M'){
-        sto_num[8] = value;
-    }
+    sto_num[variable2idx(key)] = value;
     ofstream o_storage("storage.txt");
     //ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
     for (int i = 0; i < 9; i++) {
@@ -76,14 +86,33 @@ double call_sto(char key)
     for (int i = 0; i < 9; i++) {
         c_storage >> sto_num[i];
     }
-    if (key >= 'A' && key <= 'D') {
-        return sto_num[(int)(key - 'A')];
-    } else if (key == 'x') {
-        return sto_num[6];
-    } else if (key == 'y') {
-        return sto_num[7];
-    } else if (key == 'M'){
-        return sto_num[8];
-    }
     c_storage.close();
+    return sto_num[variable2idx(key)];
+}
+
+void get_all(double * array){
+    ifstream i_storage("storage.txt");
+    //ifstream i_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+    for(int i = 0; i < 9; i ++){
+        i_storage >> array[i];
+    }
+    i_storage.close();
+}
+
+void write_all(double * array){
+    ofstream o_storage("storage.txt");
+    //ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+    for(int i = 0; i < 9; i ++){
+        o_storage << array[i] << endl;
+    }
+    o_storage.close();
+}
+
+void write_all_with_one_num(double num){
+    ofstream o_storage("storage.txt");
+    //ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+    for(int i = 0; i < 9; i ++){
+        o_storage << num << endl;
+    }
+    o_storage.close();
 }

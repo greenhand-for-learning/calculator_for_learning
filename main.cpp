@@ -14,7 +14,7 @@ int main(){
         string tmp;
         while(getline(cin, tmp)) {
             bool valid = true;
-            double ans = calculate_with_real(tmp, valid, "D");
+            double ans = calculate_with_real(tmp, valid, "R");
             if (valid) {
                 cout << tmp << " = " << ans << endl;
             }
