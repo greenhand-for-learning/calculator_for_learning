@@ -6,15 +6,16 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
-
+#include <stack>
+#include <cassert>
 using namespace std;
 typedef long long ll;
 
 bool errflag;
-ll base2oct(int base, string num){
+ll base2dec(int base, string num){
     ll ret = 0;
     int l = num.length();
-    for(int i = l - 1; i >= 0; i--){
+    for(int i = 0; i < l; i++){
         int k = 0;
         if(num[i] >= '0' && num[i] <= '9') k =  num[i] - '0';
         else if(num[i] == 'A') k = 10;
@@ -24,19 +25,18 @@ ll base2oct(int base, string num){
         else if(num[i] == 'E') k = 14;
         else if(num[i] == 'F') k = 15;
         else errflag = 1;
-
         if(k >= base)errflag = 1;
         ret = ret * base + k;
     }
     return ret;
 }
 
-string oct2base(int base, ll num){
+string dec2base(int base, ll num){
     string ret = "";
     int nnum = abs(num);
     while(nnum){
         int k = nnum % base;
-        if(k <= 9)ret += ("0" + k);
+        if(k <= 9)ret += ('0' + k);
         else if(k == 10)ret += "A";
         else if(k == 11)ret += "B";
         else if(k == 12)ret += "C";
@@ -51,8 +51,87 @@ string oct2base(int base, ll num){
     return ret;
 }
 
-void init(){
+stack <ll> s_num;
+stack <char> s_op;
+bool isnum(char s){
+    return (s >= '0' && s <= '9') || (s >= 'A' && s <= 'F');
+}
+void cal_once(){
+    ll n1 = s_num.top(); s_num.pop();
+    ll n2 = s_num.top(); s_num.pop();
+    char op = s_op.top(); s_op.pop();
+    if(op == '+') s_num.push(n1 + n2);
+    if(op == '-') s_num.push(n1 - n2);
+    if(op == '*') s_num.push(n1 * n2);
+    if(op == '/'){
+        if(n2 != 0)s_num.push(n1 / n2);
+        else{
+            cout << "Division by 0" << endl;
+            errflag = 1;
+            s_num.push(0);
+        }
+    }
+}
 
+ll cal(string s, int base){
+    while(!s_num.empty())s_num.pop();
+    while(!s_op.empty())s_op.pop();
+    s = "(" + s + ")";
+    int l = s.length();
+
+    for(int i = 0; i < l; i++){
+        if(isnum(s[i])){
+            string sn = "";
+            sn += s[i];
+            int k = i;
+            while(k + 1 < l && isnum(s[k + 1])){
+                sn += s[k + 1];
+                k++;
+            }
+            ll num;
+            k++;
+            if(s[k] == 'd') num = base2dec(10, sn);
+            else if(s[k] == 'b') num = base2dec(2, sn);
+            else if(s[k] == 'h') num = base2dec(16, sn);
+            else if(s[k] == 'o') num = base2dec(8, sn);
+            else k--, num = base2dec(base, sn);
+            s_num.push(num);
+            i = k;
+            if(errflag){
+                cout << "Invalid number" << endl;
+                return 0;
+            }
+        }
+        else if(s[i] == '(' || s[i] == '*' || s[i] == '/'){
+            s_op.push(s[i]);
+        }
+        else if(s[i] == ')'){
+            while(s_op.top() != '('){
+                if(s_op.empty()){
+                    cout << "Bracket mismatch" << endl;
+                    errflag = 1;
+                    return 0;
+                }
+                cal_once();
+                if(errflag)return 0;
+            }
+            s_op.pop();
+        }
+        else if(s[i] == '+' || s[i] == '-'){
+            while(s_op.top() == '*' || s_op.top() == '/') {
+                cal_once();
+                if (errflag)return 0;
+            }
+            s_op.push(s[i]);
+        }
+        else if(s[i] != ' '){
+            cout << "Invalid character" << endl;
+            errflag = 1;
+            return 0;
+        }
+    }
+    assert(s_num.size() == 1 && s_op.size() == 0);
+    return s_num.top();
 }
 
 
@@ -61,14 +140,14 @@ void radix_main(){
     int base;
     string s;
     cout << "radix mode" << endl;
+    cout << "You can enter a special command immediately after the value to specify the numerical mode of the value. These special commands are: d (decimal), h (hexadecimal), b (binary), and o (octal)." << endl;
+    cout << "Otherwise, all numbers are entered according to your specified base" << endl;
     cout << "input the base (2 <= base <= 16) :" << endl;
     cin >> base;
     cout << "input the expression :" << endl;
     getchar();
     getline(cin, s);
-
-
-
-
+    ll num = cal(s, base);
+    if(!errflag) cout << dec2base(base, num) << endl;
     return;
 }
