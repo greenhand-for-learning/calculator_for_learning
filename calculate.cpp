@@ -8,6 +8,7 @@
 #include <iostream>
 #define INF_SMALL 1e-10
 #define PI 3.141592653589793238462643383279
+#define e_mathematics 2.718281828459045235360287471352
 using namespace std;
 
 double D2R(double D){
@@ -329,6 +330,14 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     else if(tmp == "cbrt"){tmp2 = cbrt(tmp2);}
                 }
                 load_number(block, sign, isblock, tail, lev, tmp2);
+            }
+            else if(tmp == "pi" || tmp == "e"){
+                if(tmp == "pi"){
+                    load_number(block, sign, isblock, tail, lev, PI);
+                }
+                else if(tmp == "e"){
+                    load_number(block, sign, isblock, tail, lev, e_mathematics);
+                }
             }
             else {
                 cout << "Invalid input! Please check your use of function." << endl;
