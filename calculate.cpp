@@ -49,6 +49,17 @@ double get_number(string & formula, int & i, bool & valid, int finish){
     return ret;
 }
 
+string get_string(string & formula, int & i, bool & valid, int finish){
+    string tmp;
+    while((formula[i] >= 'a' && formula[i] <= 'z') || (formula[i] >= 'A' && formula[i] <= 'Z')){
+        tmp += formula[i];
+        i ++;
+        if(i >= finish){ break;}
+    }
+    i--;
+    return tmp;
+}
+
 void load_number(double * block, int * sign, bool * isblock, int & tail, int & lev, double num){
     if(isblock[tail - 1]){
         cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
@@ -84,6 +95,33 @@ int get_parentheses(string & formula, int & i, bool & valid, int finish){
     return ret;
 }
 
+void compute(double * block, int * sign, bool * isblock, int & tail, int & lev, int now_lev, bool & valid){
+    if(lev >= now_lev){
+        if(tail < 4 || !isblock[tail - 1] || !isblock[tail - 3] || isblock[tail - 2] || isblock[tail - 4]){
+            cout << "Invalid input! Please check your formula." << endl;
+            valid = false;
+            return;
+        }
+        while(lev >= now_lev) {
+            if (sign[tail - 2] == 1) { block[tail - 3] += block[tail - 1]; }
+            else if (sign[tail - 2] == 2) { block[tail - 3] -= block[tail - 1]; }
+            else if (sign[tail - 2] == 3) { block[tail - 3] *= block[tail - 1]; }
+            else if (sign[tail - 2] == 4) {
+                if(abs(block[tail - 1]) < INF_SMALL){
+                    cout << "Mathematical error! 0 should not be put after /." << endl;
+                    valid = false;
+                    return;
+                }
+                block[tail - 3] /= block[tail - 1];
+            }
+            if(sign[tail - 4] == 0) {lev = 0;}
+            if(sign[tail - 4] == 1 || sign[tail - 4] == 2) {lev = 1;}
+            if(sign[tail - 4] == 3 || sign[tail - 4] == 4) {lev = 2;}
+            tail -= 2;
+        }
+    }
+}
+
 double calculate_with_real(string & formula, bool & valid, string DorR = "R", int start = 0, int finish = 0x7fffffff){
     if(finish > formula.length()){
         finish = formula.length();
@@ -92,11 +130,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
     int sign[1000] = {0};
     bool isblock[1000] = {false};
     int tail = 1;
-    int g = 0;
-    string tmp;
-    stringstream * ss;
     int lev = 0;
-    int now_lev;
 
     for(int i = start; i < finish; i ++){
         if(!valid){
@@ -127,35 +161,18 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
         }
 
         if(formula[i] == '+' || formula[i] == '-' || formula[i] == '*' || formula[i] == '/'){
+            int now_lev;
             if(formula[i] == '+' || formula[i] == '-'){now_lev = 1;}
             else if(formula[i] == '*' || formula[i] == '/'){now_lev = 2;}
 
-            if(lev >= now_lev){
-                if(tail < 4 || !isblock[tail - 1] || !isblock[tail - 3] || isblock[tail - 2] || isblock[tail - 4]){
-                    cout << "Invalid input! Please check your formula." << endl;
-                    valid = false;
-                    return -1;
-                }
-                while(lev >= now_lev) {
-                    if (sign[tail - 2] == 1) { block[tail - 3] += block[tail - 1]; }
-                    else if (sign[tail - 2] == 2) { block[tail - 3] -= block[tail - 1]; }
-                    else if (sign[tail - 2] == 3) { block[tail - 3] *= block[tail - 1]; }
-                    else if (sign[tail - 2] == 4) {
-                        if(block[tail - 1] == 0){
-                            cout << "Mathematical error! 0 should not be put after /." << endl;
-                            valid = false;
-                            return -1;
-                        }
-                        block[tail - 3] /= block[tail - 1];
-                    }
-                    if(sign[tail - 4] == 0) {lev = 0;}
-                    if(sign[tail - 4] == 1 || sign[tail - 4] == 2) {lev = 1;}
-                    if(sign[tail - 4] == 3 || sign[tail - 4] == 4) {lev = 2;}
-                    tail -= 2;
-                }
-            }
+            compute(block, sign, isblock, tail, lev, now_lev, valid);
 
             if(formula[i] == '+'){//No.1, Lv.1
+                if(tail == 1){
+                    block[tail] = 0;
+                    isblock[tail] = true;
+                    tail ++;
+                }
                 sign[tail] = 1;
                 isblock[tail] = false;
                 tail ++;
@@ -197,25 +214,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 valid = false;
                 return -1;
             }
-            //These codes are entirely the same as those if formula[i] == '('.
-            g = 1;
-            i++;
-            int now = i;
-            while(g){
-                if(i >= finish){
-                    cout << "Invalid input! Please check your use of parentheses." << endl;
-                    valid = false;
-                    return -1;
-                }
-                if(formula[i] == '('){
-                    g++;
-                }
-                else if(formula[i] == ')'){
-                    g--;
-                }
-                i++;
-            }
-            i--;
+            int now = get_parentheses(formula, i, valid, finish);
             double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
             if(!isblock[tail - 1]){
                 cout << "Invalid input! Please check your use of ^." << endl;
@@ -234,12 +233,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
         }
 
         if((formula[i] >= 'a' && formula[i] <= 'z') || (formula[i] >= 'A' && formula[i] <= 'Z')){
-            while((formula[i] >= 'a' && formula[i] <= 'z') || (formula[i] >= 'A' && formula[i] <= 'Z')){
-                tmp += formula[i];///注意归零
-                i ++;
-                if(i >= finish){ break;}
-            }
-            i--;
+            string tmp = get_string(formula, i, valid, finish);
 
             if(tmp == "sin" || tmp == "cos" || tmp == "tan" || tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"
                             || tmp == "sinh" || tmp == "cosh" || tmp == "tanh"
@@ -257,49 +251,23 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     valid = false;
                     return -1;
                 }
-                //These codes are entirely the same as those if formula[i] == '('.
-                g = 1;
-                i++;
-                int now = i;
-                while(g){
-                    if(i >= finish){
-                        cout << "Invalid input! Please check your use of parentheses." << endl;
-                        valid = false;
-                        return -1;
-                    }
-                    if(formula[i] == '('){
-                        g++;
-                    }
-                    else if(formula[i] == ')'){
-                        g--;
-                    }
-                    i++;
-                }
-                i--;
-                if(isblock[tail - 1]){
-                    cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
-                    sign[tail] = 3;
-                    isblock[tail] = false;
-                    tail++;
-                    lev = 2;
-                }
+                int now = get_parentheses(formula, i, valid, finish);
                 double tmp2 = calculate_with_real(formula, valid, DorR, now, i);
+
                 if(tmp == "sin" || tmp == "cos" || tmp == "tan"){
                     if(DorR == "D"){
                         tmp2 = D2R(tmp2);
                     }
-                    if(tmp == "sin"){block[tail] = sin(tmp2);}
-                    else if(tmp == "cos"){block[tail] = cos(tmp2);}
+                    if(tmp == "sin"){tmp2 = sin(tmp2);}
+                    else if(tmp == "cos"){tmp2 = cos(tmp2);}
                     else if(tmp == "tan"){
                         if(IsInteger((tmp2 - PI / 2) / PI)){
                             cout << "Mathematical error! There is something wrong when you use tan." << endl;
                             valid = false;
                             return -1;
                         }
-                        block[tail] = tan(tmp2);
+                        tmp2 = tan(tmp2);
                     }
-                    isblock[tail] = true;
-                    tail ++;
                 }
                 else if(tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"){
                     if(tmp == "arcsin"){
@@ -322,9 +290,6 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     if(DorR == "D"){
                         tmp2 = R2D(tmp2);
                     }
-                    block[tail] = tmp2;
-                    isblock[tail] = true;
-                    tail ++;
                 }
                 else if(tmp == "tanh" || tmp == "cosh" || tmp == "sinh"
                         ||tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt"){
@@ -362,10 +327,8 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                         }
                     }
                     else if(tmp == "cbrt"){tmp2 = cbrt(tmp2);}
-                    block[tail] = tmp2;
-                    isblock[tail] = true;
-                    tail ++;
                 }
+                load_number(block, sign, isblock, tail, lev, tmp2);
             }
             else {
                 cout << "Invalid input! Please check your use of function." << endl;
@@ -373,7 +336,6 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                 return -1;
             }
 
-            tmp = "";
             continue;
         }
         cout << "Invalid input! Please check your formula." << endl;
@@ -394,32 +356,8 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
     }
     cout << endl;
      */
-    ///These codes are entirely the same as those in loop.
-    now_lev = 1;
-    if(lev >= now_lev){
-        if(tail < 4 || !isblock[tail - 1] || !isblock[tail - 3] || isblock[tail - 2] || isblock[tail - 4]){
-            cout << "Invalid input! Please check your formula." << endl;
-            valid = false;
-            return -1;
-        }
-        while(lev >= now_lev) {
-            if (sign[tail - 2] == 1) { block[tail - 3] += block[tail - 1]; }
-            else if (sign[tail - 2] == 2) { block[tail - 3] -= block[tail - 1]; }
-            else if (sign[tail - 2] == 3) { block[tail - 3] *= block[tail - 1]; }
-            else if (sign[tail - 2] == 4) {
-                if(block[tail - 1] == 0){
-                    cout << "Mathematical error! 0 should not be put after /." << endl;
-                    valid = false;
-                    return -1;
-                }
-                block[tail - 3] /= block[tail - 1];
-            }
-            if(sign[tail - 4] == 0) {lev = 0;}
-            if(sign[tail - 4] == 1 || sign[tail - 4] == 2) {lev = 1;}
-            if(sign[tail - 4] == 3 || sign[tail - 4] == 4) {lev = 2;}
-            tail -= 2;
-        }
-    }
+    int now_lev = 1;
+    compute(block, sign, isblock, tail, lev, now_lev, valid);
     if(tail == 4){
         if (sign[tail - 2] == 1) { block[tail - 3] += block[tail - 1]; }
         else if (sign[tail - 2] == 2) { block[tail - 3] -= block[tail - 1]; }
