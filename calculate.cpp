@@ -92,7 +92,6 @@ string get_string(string & formula, int & i, bool & valid, int finish){
 
 void load_number(double * block, int * sign, bool * isblock, int & tail, int & lev, double num){
     if(isblock[tail - 1]){
-        cout << "Warning: Consecutive 2 scalars will automatically add a * between them." << endl;
         sign[tail] = 3;
         isblock[tail] = false;
         tail++;
@@ -319,7 +318,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     double y = calculate_with_real(func, valid);
                     double k1 = 1e9, k2 = -1e9, k3 = 0;
                     int g = 0;
-                    while(abs(k1 - k2) > INF_SMALL || abs(k2 - k3) > INF_SMALL || abs(k1 - k3) > INF_SMALL){
+                    while(abs(k1 - k2) > 1e-6 || abs(k2 - k3) > 1e-6 || abs(k1 - k3) > 1e-6){
                         g++;
                         if(g > 1e8){
                             cout << "Mathematical error! Your formula may be too difficult to get the diff." << endl;
@@ -332,8 +331,8 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                         k1 = k2;
                         k2 = k3;
                         k3 = (y - y0) / (x - root);
-                        cout << x << ' ' << root << ' ' << y0 << ' ' << y << endl;
-                        cout << k1 << ' ' << k2 << ' ' << k3 << endl;
+                        //cout << x << ' ' << root << ' ' << y << ' ' << y0 << endl;
+                        //cout << k1 << ' ' << k2 << ' ' << k3 << endl;
                     }
                     load_number(block, sign, isblock, tail, lev, k1);
                     write_all(array);

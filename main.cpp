@@ -1,6 +1,7 @@
 #include "calculate.h"
 #include "statistic.h"
 #include "radix.h"
+#include "storage.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -10,7 +11,13 @@ int main(){
     cin >> opt;
     getchar();
     if(opt == 1){
-        cout << "Welcome to mode 1: Calculate! Now you can type in your formula." << endl;
+        cout << "Welcome to mode 1: Calculate!" << endl;
+        bool good = false;
+        while(!good){
+            filepath_configure(good);
+        }
+        check_file();
+        cout << "Now you can type in your formula." << endl;
         string tmp;
         while(getline(cin, tmp)) {
             bool valid = true;
