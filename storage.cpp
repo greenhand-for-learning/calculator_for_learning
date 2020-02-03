@@ -3,6 +3,9 @@
 #include <string>
 #include <cstdlib>
 #include "storage.h"
+
+#define MAC
+
 using namespace std;
 
 double transd(string word)
@@ -62,15 +65,21 @@ int variable2idx(char key){
 
 void io_sto(char key, double value)
 {
+#ifndef MAC
     ifstream i_storage("storage.txt");
-    //ifstream i_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#else
+    ifstream i_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#endif
     double sto_num[10];
     for (int i = 0; i < 9; i++) {
         i_storage >> sto_num[i];
     }
     sto_num[variable2idx(key)] = value;
+#ifndef MAC
     ofstream o_storage("storage.txt");
-    //ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#else
+    ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#endif
     for (int i = 0; i < 9; i++) {
         o_storage << sto_num[i] << endl;
     }
@@ -80,8 +89,11 @@ void io_sto(char key, double value)
 
 double call_sto(char key)
 {
+#ifndef MAC
     ifstream c_storage("storage.txt");
-    //ifstream c_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#else
+    ifstream c_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#endif
     double sto_num[10];
     for (int i = 0; i < 9; i++) {
         c_storage >> sto_num[i];
@@ -91,8 +103,11 @@ double call_sto(char key)
 }
 
 void get_all(double * array){
+#ifndef MAC
     ifstream i_storage("storage.txt");
-    //ifstream i_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#else
+    ifstream i_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#endif
     for(int i = 0; i < 9; i ++){
         i_storage >> array[i];
     }
@@ -100,8 +115,11 @@ void get_all(double * array){
 }
 
 void write_all(double * array){
+#ifndef MAC
     ofstream o_storage("storage.txt");
-    //ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#else
+    ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#endif
     for(int i = 0; i < 9; i ++){
         o_storage << array[i] << endl;
     }
@@ -109,8 +127,11 @@ void write_all(double * array){
 }
 
 void write_all_with_one_num(double num){
+#ifndef MAC
     ofstream o_storage("storage.txt");
-    //ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#else
+    ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
+#endif
     for(int i = 0; i < 9; i ++){
         o_storage << num << endl;
     }
