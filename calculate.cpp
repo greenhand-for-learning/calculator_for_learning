@@ -81,7 +81,7 @@ double get_number(string & formula, int & i, bool & valid, int finish){
 
 string get_string(string & formula, int & i, bool & valid, int finish){
     string tmp;
-    while((formula[i] >= 'a' && formula[i] <= 'z') && formula[i] != 'x' && formula[i] != 'y'){
+    while(formula[i] >= 'a' && formula[i] <= 'z'){
         tmp += formula[i];
         i ++;
         if(i >= finish){ break;}
@@ -309,7 +309,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     }
                     j++;
                     double root = calculate_with_real(formula, valid, DorR, j, i);
-                    cout << func << endl << root << endl;
+                    //cout << func << endl << root << endl;
                     get_all(array);
                     write_all_with_one_num(root);
                     double y0 = calculate_with_real(func, valid);
@@ -328,6 +328,11 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                         x = (x + root) / 2;
                         write_all_with_one_num(x);
                         y = calculate_with_real(func, valid);
+                        if((y - y0) < 1e-15){
+                            cout << "Mathematical error! Your formula may be too difficult to get the diff." << endl;
+                            valid = false;
+                            return -1;
+                        }
                         k1 = k2;
                         k2 = k3;
                         k3 = (y - y0) / (x - root);
