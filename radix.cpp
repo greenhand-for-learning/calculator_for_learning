@@ -107,9 +107,24 @@ ll cal(string s, int base){
             }
             last_num = 1;
         }
-        else if(s[i] == '(' || s[i] == '*' || s[i] == '/') {
+        else if(s[i] == '(') {
             s_op.push(s[i]);
-            if(s[i] == '*' || s[i] == '/')last_num = 0;
+        }
+        else if(s[i] == '*' || s[i] == '/'){
+            if(s_op.top() == '*' || s_op.top() == '/'){
+                cal_once();
+                if (errflag)return 0;
+            }
+            s_op.push(s[i]);
+            last_num = 0;
+        }
+        else if(s[i] == '+' || s[i] == '-'){
+            while(s_op.top() != '(') {
+                cal_once();
+                if (errflag)return 0;
+            }
+            s_op.push(s[i]);
+            last_num = 0;
         }
         else if(s[i] == ')'){
             while(s_op.top() != '('){
@@ -122,14 +137,6 @@ ll cal(string s, int base){
                 if(errflag)return 0;
             }
             s_op.pop();
-        }
-        else if(s[i] == '+' || s[i] == '-'){
-            while(s_op.top() == '*' || s_op.top() == '/') {
-                cal_once();
-                if (errflag)return 0;
-            }
-            s_op.push(s[i]);
-            last_num = 0;
         }
         else if(s[i] != ' '){
             cout << "Invalid character" << endl;
