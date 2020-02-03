@@ -2,11 +2,12 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <iomanip>
 #include "storage.h"
 
-#define MAC
-
 using namespace std;
+
+string filepath = "";
 
 double transd(string word)
 {
@@ -38,10 +39,10 @@ void input(string line)
     }
     cout << endl;*/
     if (word[0] == "STO" && word[1] != "CALL") {
-        io_sto(transc(word[1]),transd(word[2]));
+        //io_sto(transc(word[1]),transd(word[2]));
     }
     else if(word[0]=="STO"&&word[1]=="CALL"){
-        call_sto(transc(word[2]));
+        //call_sto(transc(word[2]));
     }
 }
 
@@ -63,25 +64,62 @@ int variable2idx(char key){
     }
 }
 
+string filepath_configure(bool & valid){
+    cout << "Now we have to configure something first." << endl;
+    cout << "If you are using Windows, you can skip this step, with just press Enter." << endl;
+    cout << "If you are using Mac OS, you should type in the file path of the application. A valid file path should look like "
+            "'/Users/pc/Desktop/'. You may drag your application in your shell to get the file path." << endl;
+    string ret;
+    getline(cin, ret);
+    if(ret.length() == 0){
+        filepath = "storage.txt";
+        valid = true;
+        return "storage.txt";
+    }
+    for(int i = ret.length() - 1; i >= 0; i --){
+        if(ret[i] == '/'){
+            string path = ret.substr(0, i + 1);
+            path += "storage.txt";
+            filepath = path;
+            valid = true;
+            return path;
+        }
+    }
+    cout << "Invalid input! Please check your file path!" << endl;
+    valid = false;
+    filepath = "";
+    return "";
+}
+
+bool check_file(){
+    ifstream fin(filepath);
+    if(fin.is_open()){
+        fin.close();
+        return true;
+    } else {
+        ofstream fout(filepath);
+        if(fout.is_open()){
+            fout.close();
+            write_all_with_one_num(0);
+            return true;
+        } else {
+            cout << "Warning: Cannot open the file. Some features may not work properly." << endl;
+            return false;
+        }
+    }
+}
+
 void io_sto(char key, double value)
 {
-#ifndef MAC
-    ifstream i_storage("storage.txt");
-#else
-    ifstream i_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
-#endif
+    ifstream i_storage(filepath);
     double sto_num[10];
     for (int i = 0; i < 9; i++) {
         i_storage >> sto_num[i];
     }
     sto_num[variable2idx(key)] = value;
-#ifndef MAC
-    ofstream o_storage("storage.txt");
-#else
-    ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
-#endif
+    ofstream o_storage(filepath);
     for (int i = 0; i < 9; i++) {
-        o_storage << sto_num[i] << endl;
+        o_storage << fixed << setprecision(15) << sto_num[i] << endl;
     }
     i_storage.close();
     o_storage.close();
@@ -89,11 +127,7 @@ void io_sto(char key, double value)
 
 double call_sto(char key)
 {
-#ifndef MAC
-    ifstream c_storage("storage.txt");
-#else
-    ifstream c_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
-#endif
+    ifstream c_storage(filepath);
     double sto_num[10];
     for (int i = 0; i < 9; i++) {
         c_storage >> sto_num[i];
@@ -103,11 +137,7 @@ double call_sto(char key)
 }
 
 void get_all(double * array){
-#ifndef MAC
-    ifstream i_storage("storage.txt");
-#else
-    ifstream i_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
-#endif
+    ifstream i_storage(filepath);
     for(int i = 0; i < 9; i ++){
         i_storage >> array[i];
     }
@@ -115,25 +145,17 @@ void get_all(double * array){
 }
 
 void write_all(double * array){
-#ifndef MAC
-    ofstream o_storage("storage.txt");
-#else
-    ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
-#endif
+    ofstream o_storage(filepath);
     for(int i = 0; i < 9; i ++){
-        o_storage << array[i] << endl;
+        o_storage << fixed << setprecision(15) << array[i] << endl;
     }
     o_storage.close();
 }
 
 void write_all_with_one_num(double num){
-#ifndef MAC
-    ofstream o_storage("storage.txt");
-#else
-    ofstream o_storage("/Users/pc/Documents/undergraduate/Freshman spring/vacation/CASIO/storage.txt");
-#endif
+    ofstream o_storage(filepath);
     for(int i = 0; i < 9; i ++){
-        o_storage << num << endl;
+        o_storage << fixed << setprecision(15) << num << endl;
     }
     o_storage.close();
 }
