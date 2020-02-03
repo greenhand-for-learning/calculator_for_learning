@@ -7,9 +7,9 @@
 #include <sstream>
 #include <iostream>
 #include "storage.h"
-#define INF_SMALL 1e-10
-#define PI 3.141592653589793238462643383279
-#define e_mathematics 2.718281828459045235360287471352
+#define INF_SMALL (1e-10)
+#define PI (3.141592653589793238462643383279)
+#define e_mathematics (2.718281828459045235360287471352)
 using namespace std;
 
 double D2R(double D){
@@ -155,6 +155,11 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
     if(finish > formula.length()){
         finish = formula.length();
     }
+    if(finish <= start){
+        cout << "Invalid input! There shouldn't be empty parentheses or empty formula." << endl;
+        valid = false;
+        return -1;
+    }
     double block[1000] = {0};
     int sign[1000] = {0};
     bool isblock[1000] = {false};
@@ -267,13 +272,33 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
             continue;
         }
 
+        if(formula[i] == '!'){
+            if(!isblock[tail - 1]){
+                cout << "Invalid input! ! must be put after a number." << endl;
+                valid = false;
+                return -1;
+            }
+            if(!IsInteger(block[tail - 1])){
+                cout << "Mathematical error! The number before ! must be an integer." << endl;
+                valid = false;
+                return -1;
+            }
+            double num = block[tail - 1];
+            block[tail - 1] = 1;
+            while(num > 1 + INF_SMALL){
+                block[tail - 1] *= num;
+                num --;
+            }
+            continue;
+        }
+
         if((formula[i] >= 'a' && formula[i] <= 'z') && formula[i] != 'x' && formula[i] != 'y'){
             string tmp = get_string(formula, i, valid, finish);
 
             if(tmp == "sin" || tmp == "cos" || tmp == "tan" || tmp == "arcsin" || tmp == "arccos" || tmp == "arctan"
                             || tmp == "sinh" || tmp == "cosh" || tmp == "tanh"
-                            || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt"
-                            || tmp == "diff"){
+                            || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt" || tmp == "abs"
+                            || tmp == "diff" || tmp == "sum" || tmp == "ls"){
                 //These codes are entirely the same as those if formula[i] == '^'.
                 i++;
                 while(i < finish && formula[i] == ' '){i++;}
@@ -339,7 +364,125 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                         //cout << x << ' ' << root << ' ' << y << ' ' << y0 << endl;
                         //cout << k1 << ' ' << k2 << ' ' << k3 << endl;
                     }
-                    load_number(block, sign, isblock, tail, lev, k1);
+                    load_number(block, sign, isblock, tail, lev, k3);
+                    write_all(array);
+                }
+                else if(tmp == "sum"){
+                    string func;
+                    double array[10];
+                    int j = now;
+                    while(formula[j] != ','){
+                        if(j >= i){
+                            cout << "Invalid input! The function sum should be used as sum(3x, 2, 4)." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        func += formula[j];
+                        j++;
+                    }
+                    j++;
+                    int first_start = j;
+                    while(formula[j] != ','){
+                        if(j >= i){
+                            cout << "Invalid input! The function sum should be used as sum(3x, 2, 4)." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        j++;
+                    }
+                    int first_end = j;
+                    j++;
+                    double first = calculate_with_real(formula, valid, DorR, first_start, first_end);
+                    double second = calculate_with_real(formula, valid, DorR, j, i);
+                    if(!IsInteger(first) || !IsInteger(second)){
+                        cout << "Mathematical error! The function sum must be between two integer." << endl;
+                        valid = false;
+                        return -1;
+                    }
+                    if(first > second){
+                        double tmp2 = second;
+                        second = first;
+                        first = tmp2;
+                    }
+                    get_all(array);
+                    double tmp2 = 0;
+                    for(double k = first; k < second + 3 * INF_SMALL; k++){
+                        write_all_with_one_num(k);
+                        tmp2 += calculate_with_real(func, valid);
+                    }
+                    load_number(block, sign, isblock, tail, lev, tmp2);
+                    write_all(array);
+                }
+                else if(tmp == "ls"){
+                    if(DorR != "R"){
+                        cout << "Error! When using function ls, you have to choose R rather than D(degree)." << endl;
+                        valid = false;
+                        return -1;
+                    }
+                    string func;
+                    double array[10];
+                    int j = now;
+                    while(formula[j] != ','){
+                        if(j >= i){
+                            cout << "Invalid input! The function ls should be used as ls(3x, 2, 4)." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        func += formula[j];
+                        j++;
+                    }
+                    j++;
+                    int first_start = j;
+                    while(formula[j] != ','){
+                        if(j >= i){
+                            cout << "Invalid input! The function ls should be used as ls(3x, 2, 4)." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        j++;
+                    }
+                    int first_end = j;
+                    j++;
+                    double first = calculate_with_real(formula, valid, DorR, first_start, first_end);
+                    double second = calculate_with_real(formula, valid, DorR, j, i);
+                    bool positive = (first < second);
+                    if(!positive){
+                        double tmp2 = second;
+                        second = first;
+                        first = tmp2;
+                    }
+                    get_all(array);
+                    double k1 = 1e9, k2 = -1e9, k3 = 0;
+                    int g = 0;
+                    int num_split = 100;
+                    double len_split = (second - first) / num_split;
+                    cout << "computing..." << endl;
+                    while(abs(k1 - k2) > 1e-3 || abs(k2 - k3) > 1e-3 || abs(k1 - k3) > 1e-3){
+                        if(++g > 1e8){
+                            cout << "Mathematical error! This formula may be too difficult to do ls." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                        k1 = k2;
+                        k2 = k3;
+                        k3 = 0;
+                        for(int k = 1; k <= num_split; k ++){
+                            write_all_with_one_num(first + k * len_split);
+                            k3 += calculate_with_real(func, valid) * len_split;
+                        }
+                        num_split *= 2;
+                        len_split = (second - first) / num_split;
+                        if(len_split < INF_SMALL){
+                            cout << "Mathematical error! This formula may be too difficult to do ls." << endl;
+                            valid = false;
+                            return -1;
+                        }
+                    }
+                    if(!positive){
+                        k3 = -k3;
+                    }
+                    load_number(block, sign, isblock, tail, lev, k3);
+                    cout << "Warning: If you use function ls, we can only garantee the precision of 0.001." << endl;
                     write_all(array);
                 }
                 else {
@@ -378,11 +521,12 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                             tmp2 = R2D(tmp2);
                         }
                     } else if (tmp == "tanh" || tmp == "cosh" || tmp == "sinh"
-                               || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt") {
+                               || tmp == "exp" || tmp == "ln" || tmp == "lg" || tmp == "sqrt" || tmp == "cbrt" || tmp == "abs") {
                         if (tmp == "sinh") { tmp2 = sinh(tmp2); }
                         else if (tmp == "cosh") { tmp2 = cosh(tmp2); }
                         else if (tmp == "tanh") { tmp2 = tanh(tmp2); }
                         else if (tmp == "exp") { tmp2 = exp(tmp2); }
+                        else if (tmp == "abs") { tmp2 = abs(tmp2); }
                         else if (tmp == "ln") {
                             if (tmp2 < INF_SMALL) {
                                 cout << "Mathematical error! There is something wrong when you use ln." << endl;

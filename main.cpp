@@ -17,9 +17,10 @@ int main(){
             filepath_configure(good);
         }
         check_file();
-        cout << "Now you can type in your formula." << endl;
+        cout << "Now you can type in your formula. Type in q to exit." << endl;
         string tmp;
         while(getline(cin, tmp)) {
+            if(tmp == "q"){ break;}
             bool valid = true;
             double ans = calculate_with_real(tmp, valid, "R");
             if (valid) {
