@@ -339,6 +339,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     write_all_with_one_num(root);
                     double y0 = calculate_with_real(func, valid);
                     double x = root * 1.001;
+                    ///There's something wrong here.
                     write_all_with_one_num(x);
                     double y = calculate_with_real(func, valid);
                     double k1 = 1e9, k2 = -1e9, k3 = 0;
@@ -458,7 +459,7 @@ double calculate_with_real(string & formula, bool & valid, string DorR = "R", in
                     double len_split = (second - first) / num_split;
                     cout << "computing..." << endl;
                     while(abs(k1 - k2) > 1e-3 || abs(k2 - k3) > 1e-3 || abs(k1 - k3) > 1e-3){
-                        if(++g > 1e8){
+                        if(++g > 100){
                             cout << "Mathematical error! This formula may be too difficult to do ls." << endl;
                             valid = false;
                             return -1;

@@ -7,7 +7,7 @@
 using namespace std;
 int main(){
     int opt;
-    cout << "Please choose a mode. (Now only mode 1, 3 is available.)" << endl;
+    cout << "Please choose a mode. (Now only modes 1, 3, 6 are available.)" << endl;
     cin >> opt;
     getchar();
     if(opt == 1){
